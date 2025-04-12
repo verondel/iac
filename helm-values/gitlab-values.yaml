@@ -1,0 +1,18 @@
+global:
+  hosts:
+    domain: verondello.ru
+    externalIP: ${yandex_vpc_address.gitlab_ip.external_ipv4_address[0].address}
+  ingress:
+    configureCertmanager: true
+    annotations:
+      # kubernetes.io/ingress.class: nginx
+      cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    tls:
+      enabled: true
+      secretName: gitlab-tls
+certmanager:
+  install: true
+  email: v.a.skryl@yandex.ru
+
+nginx-ingress:
+  enabled: true
