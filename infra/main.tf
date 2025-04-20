@@ -257,8 +257,8 @@ resource "yandex_kubernetes_node_group" "infra_node_group" {
       subnet_ids = [yandex_vpc_subnet.infra-subnet.id]
     }
     resources {
-      memory = 2
-      cores  = 2
+      memory = 16
+      cores  = 4
     }
     boot_disk {
       type = "network-hdd"
@@ -280,7 +280,7 @@ resource "yandex_kubernetes_node_group" "infra_node_group" {
 
   scale_policy {
     fixed_scale {
-      size = 3
+      size = 2
     }
   }
 

@@ -93,7 +93,13 @@ services:
 	fi; \
 	echo "🔐 Используем YC_TOKEN из $(TOKEN_FILE)"; \
 	export YC_TOKEN=$$TOKEN; \
-	cd $(SERVICES_DIR) && terraform init && terraform apply -auto-approve -var-file=../$(CONFIG)
+
+	# ⬇️ Обновляем terraform.tfvars.json с актуальным folder_id
+	@echo "🛠️  Обновляем folder_id в $(TFVARS_PATH)..."
+	@jq ".folder_id = \"$(FOLDER_ID)\"" $(TFVARS_PATH) > $(TFVARS_PATH).tmp && mv $(TFVARS_PATH).tmp $(TFVARS_PATH)
+
+	cd $(SERVICES_DIR) && terraform init
+	cd $(SERVICES_DIR) && terraform apply -auto-approve -var-file=../$(CONFIG)
 
 
 # -------------------------
@@ -104,6 +110,7 @@ clean:
 	cd $(CLOUD_DIR) && terraform destroy -auto-approve -var-file=../$(CONFIG) || true
 	@echo "🧹 Удаляем временные файлы..."
 	rm -f $(KUBECONFIG)
+
 
 # @echo "🔥 Удаляем phase2_services..."
 # cd $(SERVICES_DIR) && terraform destroy -auto-approve -var-file=../$(CONFIG) || true

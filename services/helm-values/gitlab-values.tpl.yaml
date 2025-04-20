@@ -10,9 +10,114 @@ global:
       enabled: true
       secretName: gitlab-tls
 
+  # Убираем лишние зависимости
+  psql:
+    install: true
+  redis:
+    install: true
+  minio:
+    install: true
+  kas:
+    enabled: false
+
 certmanager:
-  install: true
+  install: false
+
+certmanager-issuer:
   email: ${tls_email}
 
 nginx-ingress:
   enabled: true
+
+gitlab:
+  webservice:
+    enabled: true
+    replicaCount: 1
+    resources:
+      requests:
+        memory: 2Gi
+        cpu: 1000m
+      limits:
+        memory: 3Gi
+        cpu: 1500m
+
+  sidekiq:
+    enabled: true
+    resources:
+      requests:
+        memory: 1Gi
+        cpu: 500m
+      limits:
+        memory: 2Gi
+        cpu: 1000m
+
+  gitaly:
+    resources:
+      requests:
+        memory: 1Gi
+        cpu: 300m
+      limits:
+        memory: 1.5Gi
+        cpu: 500m
+
+  gitlab-shell:
+    resources:
+      requests:
+        memory: 256Mi
+        cpu: 200m
+      limits:
+        memory: 512Mi
+        cpu: 300m
+
+registry:
+  enabled: true
+  resources:
+    requests:
+      memory: 512Mi
+      cpu: 300m
+    limits:
+      memory: 1Gi
+      cpu: 500m
+
+postgresql:
+  resources:
+    requests:
+      memory: 1Gi
+      cpu: 500m
+    limits:
+      memory: 1.5Gi
+      cpu: 800m
+
+redis:
+  resources:
+    requests:
+      memory: 512Mi
+      cpu: 200m
+    limits:
+      memory: 1Gi
+      cpu: 400m
+
+toolbox:
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 100m
+    limits:
+      memory: 512Mi
+      cpu: 200m
+
+gitlab-runner:
+  runners:
+    config: |
+      [[runners]]
+        name = "default"
+        url = "https://gitlab.${domain}"
+        executor = "kubernetes"
+        [runners.kubernetes]
+          namespace = "gitlab"
+          image = "ubuntu:20.04"
+          privileged = true
+          cpu_request = "200m"
+          memory_request = "512Mi"
+          cpu_limit = "500m"
+          memory_limit = "1Gi"
