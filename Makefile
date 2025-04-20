@@ -1,12 +1,19 @@
+TFVARS_PATH := ./config/terraform.tfvars.json
+
 # Пути до фаз
 CLOUD_DIR=infra
 SERVICES_DIR=services
 CONFIG=config/terraform.tfvars.json
 KUBECONFIG=$(SERVICES_DIR)/vera-infra-kubeconfig.yaml
+TOKEN_FILE := ./secrets/yc-token.txt
 
 # Получение имени кластера из terraform output
+CLOUD_ID := $(shell jq -r '.cloud_id' $(TFVARS_PATH))
+FOLDER_NAME := $(shell jq -r '.folder_name' $(TFVARS_PATH))
 CLUSTER_NAME=$(shell terraform -chdir=$(CLOUD_DIR) output -raw cluster_name)
 FOLDER_ID=$(shell terraform -chdir=$(CLOUD_DIR) output -raw folder_id)
+
+# CLUSTER_NAME := zonal-infra-cluster
 
 .PHONY: all cloud services clean kubeconfig
 
@@ -29,22 +36,6 @@ cloud-only:
 # -------------------------
 # Генерация kubeconfig
 # -------------------------
-# kubeconfig:
-# 	@echo "📡 [KUBECONFIG] Получаем kubeconfig для кластера..."
-# 	@if [ ! -f $(KUBECONFIG) ]; then \
-# 		echo "📄 kubeconfig не найден. Генерируем..."; \
-# 		yc managed-kubernetes cluster get-credentials $$CLUSTER_NAME --external --folder-id $$FOLDER_ID --config $(KUBECONFIG); \
-# 	else \
-# 		echo "✅ kubeconfig уже существует."; \
-# 	fi
-
-
-TFVARS_PATH := ./config/terraform.tfvars.json
-TOKEN_FILE := ./secrets/yc-token.txt
-
-CLOUD_ID := $(shell jq -r '.cloud_id' $(TFVARS_PATH))
-FOLDER_NAME := $(shell jq -r '.folder_name' $(TFVARS_PATH))
-CLUSTER_NAME := zonal-infra-cluster
 
 kubeconfig:
 	@echo "📡 [KUBECONFIG] Получаем kubeconfig для кластера $(CLUSTER_NAME)..."
@@ -75,16 +66,35 @@ kubeconfig:
 
 # export KUBECONFIG=./vera-infra-kubeconfig.yaml
 
-
-
-
 # -------------------------
 # Фаза 2: Установка GitLab и сервисов
 # -------------------------
+# services:
+# 	@echo "📦 [SERVICES] Установка GitLab и других сервисов..."
+# 	cd $(SERVICES_DIR) && terraform init
+# 	cd $(SERVICES_DIR) && terraform apply -auto-approve -var-file=../$(CONFIG)
+
+
 services:
 	@echo "📦 [SERVICES] Установка GitLab и других сервисов..."
-	cd $(SERVICES_DIR) && terraform init
-	cd $(SERVICES_DIR) && terraform apply -auto-approve -var-file=../$(CONFIG)
+
+	@if [ ! -f $(TOKEN_FILE) ]; then \
+		echo "❌ Файл с токеном не найден: $(TOKEN_FILE)"; \
+		echo "   Положи OAuth токен в $(TOKEN_FILE) и повтори."; \
+		exit 1; \
+	fi
+
+	@TOKEN=$$(cat $(TOKEN_FILE)); \
+	if ! yc config get cloud-id > /dev/null 2>&1; then \
+		echo "⚙️  Устанавливаем cloud-id из terraform.tfvars.json..."; \
+		yc config set cloud-id $(CLOUD_ID); \
+	else \
+		echo "✅ cloud-id уже установлен."; \
+	fi; \
+	echo "🔐 Используем YC_TOKEN из $(TOKEN_FILE)"; \
+	export YC_TOKEN=$$TOKEN; \
+	cd $(SERVICES_DIR) && terraform init && terraform apply -auto-approve -var-file=../$(CONFIG)
+
 
 # -------------------------
 # Удаление всех ресурсов
