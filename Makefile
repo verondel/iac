@@ -15,7 +15,7 @@ FOLDER_ID=$(shell terraform -chdir=$(CLOUD_DIR) output -raw folder_id)
 
 # CLUSTER_NAME := zonal-infra-cluster
 
-.PHONY: all cloud services clean kubeconfig
+.PHONY: all cloud services clean kubeconfig clean destroy-services clean-state
 
 # -------------------------
 # Полный запуск
@@ -113,8 +113,15 @@ clean:
 
 
 destroy-services:
+	@echo "🔥 Удаляем services..."
 	cd services && terraform destroy -auto-approve -var-file=../config/terraform.tfvars.json
 
+clean-state:
+	@echo "🧹 Удаляем файлы стейта терраформа..."
+	cd infra && rm -rf .terraform .terraform.lock.hcl terraform.tfstate terraform.tfstate.backup
+	cd services && rm -rf .terraform .terraform.lock.hcl terraform.tfstate terraform.tfstate.backup
+	@echo "🧹 Удаляем kubeconfig файлы..."
+	rm -f $(KUBECONFIG)
 
 
 # @echo "🔥 Удаляем phase2_services..."
