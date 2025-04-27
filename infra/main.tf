@@ -93,10 +93,10 @@ resource "yandex_vpc_security_group" "infra-security-group" {
 # 10250 (kubelet API)
 
 
-resource "yandex_logging_group" "infra-logging-group" {
-  name      = var.logging_group_name
-  folder_id = yandex_resourcemanager_folder.infra-folder.id
-}
+# resource "yandex_logging_group" "infra-logging-group" {
+#   name      = var.logging_group_name
+#   folder_id = yandex_resourcemanager_folder.infra-folder.id
+# }
 
 resource "yandex_kms_symmetric_key" "infra-kms-key" {
   name              = var.kms_key_name
@@ -208,8 +208,8 @@ resource "yandex_kubernetes_cluster" "zonal_cluster" {
     }
 
     master_logging {
-      enabled                    = true
-      log_group_id               = yandex_logging_group.infra-logging-group.id
+      enabled = true
+      # log_group_id               = yandex_logging_group.infra-logging-group.id
       kube_apiserver_enabled     = true
       cluster_autoscaler_enabled = true
       events_enabled             = true
@@ -280,7 +280,7 @@ resource "yandex_kubernetes_node_group" "infra_node_group" {
 
   scale_policy {
     fixed_scale {
-      size = 2
+      size = 3
     }
   }
 

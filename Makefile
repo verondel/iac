@@ -75,7 +75,7 @@ kubeconfig:
 # 	cd $(SERVICES_DIR) && terraform apply -auto-approve -var-file=../$(CONFIG)
 
 
-services:
+services: kubeconfig
 	@echo "📦 [SERVICES] Установка GitLab и других сервисов..."
 
 	@if [ ! -f $(TOKEN_FILE) ]; then \
@@ -110,6 +110,11 @@ clean:
 	cd $(CLOUD_DIR) && terraform destroy -auto-approve -var-file=../$(CONFIG) || true
 	@echo "🧹 Удаляем временные файлы..."
 	rm -f $(KUBECONFIG)
+
+
+destroy-services:
+	cd services && terraform destroy -auto-approve -var-file=../config/terraform.tfvars.json
+
 
 
 # @echo "🔥 Удаляем phase2_services..."

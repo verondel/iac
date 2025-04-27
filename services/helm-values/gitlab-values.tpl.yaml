@@ -3,9 +3,13 @@ global:
     domain: ${domain}
     externalIP: ${external_ip}
   ingress:
-    configureCertmanager: true
+    class: gitlab-nginx 
+    # configureCertmanager: true
+    configureCertmanager: false
     annotations:
+      # kubernetes.io/ingress.class: "gitlab-nginx"
       cert-manager.io/cluster-issuer: "letsencrypt-prod"
+      acme.cert-manager.io/http01-edit-in-place: "true"
     tls:
       enabled: true
       secretName: gitlab-tls
@@ -70,6 +74,9 @@ gitlab:
         cpu: 300m
 
 registry:
+  ingress:
+    tls:
+      enabled: false
   enabled: true
   resources:
     requests:
@@ -121,3 +128,14 @@ gitlab-runner:
           memory_request = "512Mi"
           cpu_limit = "500m"
           memory_limit = "1Gi"
+
+nginx-ingress:
+  enabled: true
+  controller:
+    ingressClass: gitlab-nginx
+    ingressClassResource:
+      name: gitlab-nginx
+      enabled: true
+      default: false
+    service:
+      externalTrafficPolicy: Local
