@@ -130,12 +130,4 @@ gitlab-runner:
           memory_limit = "1Gi"
 
 nginx-ingress:
-  enabled: true
-  controller:
-    ingressClass: gitlab-nginx
-    ingressClassResource:
-      name: gitlab-nginx
-      enabled: true
-      default: false
-    service:
-      externalTrafficPolicy: Local
+  enabled: false
