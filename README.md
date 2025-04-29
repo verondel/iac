@@ -3,5 +3,5 @@
 3. `make cloud`
 4. `make services`
 5. get gitlab login: "root", password: `kubectl get secret -n gitlab gitlab-gitlab-initial-root-password -o jsonpath="{.data.password}" | base64 --decode` 
-6. change root password! (not use `<ur_name>_<birth_year>`, be smarter as a creator of this repo by using `<birth_year>_<ur_name>`)
+6. change root password!`https://gitlab.verondello.ru/-/user_settings/password/edit` (do not use `<ur_name>_<birth_year>`, be smarter as a creator of this repo by using `<birth_year>_<ur_name>`)
 7. `Admin Area > Settings > General > Sign-up restrictions`
