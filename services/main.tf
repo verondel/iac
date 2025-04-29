@@ -1,4 +1,26 @@
 // ---------------------------------------------------
+// Фаза 0: Storage Class
+// ---------------------------------------------------
+
+
+resource "kubernetes_storage_class" "yc_standard" {
+  metadata {
+    name = "yc-standard"
+  }
+
+  storage_provisioner = "disk-csi-driver.mks.yandex.net"
+
+  parameters = {
+    type = "network-ssd"
+    zone = "ru-central1-a"
+  }
+
+  reclaim_policy      = "Retain"
+  volume_binding_mode = "WaitForFirstConsumer"
+}
+
+
+// ---------------------------------------------------
 // Фаза 1: Внешний IP
 // ---------------------------------------------------
 
