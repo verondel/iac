@@ -67,10 +67,6 @@ resource "yandex_dns_recordset" "minio" {
   data    = [yandex_vpc_address.gitlab_ip.external_ipv4_address[0].address]
 }
 
-output "gitlab_external_ip" {
-  value = yandex_vpc_address.gitlab_ip.external_ipv4_address[0].address
-}
-
 // ---------------------------------------------------
 // Фаза 2: gitlab NS + Ingress Nginx for certs
 // ---------------------------------------------------

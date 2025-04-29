@@ -4,3 +4,7 @@ output "storage_class_name" {
     0
   ].name
 }
+
+output "gitlab_external_ip" {
+  value = yandex_vpc_address.gitlab_ip.external_ipv4_address[0].address
+}
