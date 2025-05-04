@@ -30,9 +30,6 @@ certmanager:
 certmanager-issuer:
   email: ${tls_email}
 
-nginx-ingress:
-  enabled: true
-
 gitlab:
   webservice:
     enabled: true
